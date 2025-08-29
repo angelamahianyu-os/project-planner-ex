@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Lunch Project Planner</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .phase {
+            background: white;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .phase-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #3498db;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .tasks {
+            margin-top: 15px;
+            display: none;
+        }
+        .tasks.show {
+            display: block;
+        }
+        .task {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+        }
+        input[type="checkbox"] {
+            margin-right: 10px;
+            margin-top: 4px;
+        }
+        label {
+            flex-grow: 1;
+        }
+        .task-meta {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            margin-left: 30px;
+            font-style: italic;
+        }
+        .progress-bar {
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background-color: #2ecc71;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Quarterly Team Lunch Planner</h1>
+
+    <div class="progress-bar">
+        <div class="progress" id="main-progress"></div>
+    </div>
+
+    <div class="phase">
+        <div class="phase-title" onclick="toggleTasks('phase1')">
+            Phase 1: Logistics & Options Research
+            <span>▼</span>
+        </div>
+        <div class="tasks" id="phase1">
+            <div class="task">
+                <input type="checkbox" id="task1-1" onchange="updateProgress()">
+                <label for="task1-1">Draft a Doodle poll or email to Sarah, Ben, Maria, and David with 3-4 potential dates/times.</label>
+                <div class="task-meta">[VA] | Est. 0.5 hrs | REMINDER: Follow up in 2 days</div>
+            </div>
+            <div class="task">
+                <input type="checkbox" id="task1-2" onchange="updateProgress()">
+                <label for="task1-2">Research 3 restaurants near the office that fit the budget and dietary needs.</label>
+                <div class="task-meta">[VA] | Est. 1 hr</div>
+            </div>
+            <div class="task">
+                <input type="checkbox" id="task1-3" onchange="updateProgress()">
+                <label for="task1-3">Client to provide: Any specific restaurant preferences or cuisines to avoid.</label>
+                <div class="task-meta">[Client]</div>
+            </div>
+            <div class="task">
+                <input type="checkbox" id="task1-4" onchange="updateProgress()">
+                <label for="task1-4">Compile date consensus and restaurant shortlist for client to choose from.</label>
+                <div class="task-meta">[VA] | Est. 0.5 hrs</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="phase">
+        <div class="phase-title" onclick="toggleTasks('phase2')">
+            Phase 2: Reservation & Confirmation
+            <span>▼</span>
+        </div>
+        <div class="tasks" id="phase2">
+            <div class="task">
+                <input type="checkbox" id="task2-1" onchange="updateProgress()">
+                <label for="task2-1">Call the restaurant to check availability for the chosen date.</label>
+                <div class="task-meta">[VA] | Est. 0.5 hrs</div>
+            </div>
+            <div class="task">
+                <input type="checkbox" id="task2-2" onchange="updateProgress()">
+                <label for="task2-2">Formally book the reservation under the client's name and get confirmation number.</label>
+                <div class="task-meta">[VA] | Est. 0.5 hrs</div>
+            </div>
+            <div class="task">
+                <input type="checkbox" id="task2-3" onchange="updateProgress()">
+                <label for="task2-3">Create and send a calendar invite to all attendees with all details.</label>
+                <div class="task-meta">[VA] | Est. 0.5 hrs | REMINDER: Request RSVPs</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="phase">
+        <div class="phase-title" onclick="toggleTasks('phase3')">
+            Phase 3: Pre-Event Coordination
+            <span>▼</span>
+        </div>
+        <div class="tasks" id="phase3">
+            <div class="task">
+                <input type="checkbox" id="task3-1" onchange="updateProgress()">
+                <label for="task3-1">Confirm final headcount with the restaurant 24 hours in advance.</label>
+                <div class="task-meta">[VA] | Est. 0.5 hrs</div>
+            </div>
+            <div class="task">
+                <input type="checkbox" id="task3-2" onchange="updateProgress()">
+                <label for="task3-2">Send a polite reminder email to all attendees the morning of the event.</label>
+                <div class="task-meta">[VA] | Est. 0.25 hrs</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to toggle task visibility
+        function toggleTasks(phaseId) {
+            const tasks = document.getElementById(phaseId);
+            tasks.classList.toggle('show');
+        }
+
+        // Function to calculate and update progress bar
+        function updateProgress() {
+            const totalTasks = document.querySelectorAll('input[type="checkbox"]').length;
+            const completedTasks = document.querySelectorAll('input[type="checkbox"]:checked').length;
+            const progressPercentage = (completedTasks / totalTasks) * 100;
+
+            const progressBar = document.getElementById('main-progress');
+            progressBar.style.width = progressPercentage + '%';
+
+            // Save state to localStorage
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach((checkbox, index) => {
+                localStorage.setItem(checkbox.id, checkbox.checked);
+            });
+        }
+
+        // Function to load saved state from localStorage
+        function loadProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach((checkbox) => {
+                const isChecked = localStorage.getItem(checkbox.id) === 'true';
+                checkbox.checked = isChecked;
+            });
+            updateProgress(); // Update the bar after loading
+        }
+
+        // Load progress when the page starts
+        window.onload = loadProgress;
+    </script>
+</body>
+</html>
