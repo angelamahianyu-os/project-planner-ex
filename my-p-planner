@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Team-Building Event – Project Checklist</title>
+  <meta name="description" content="Simple static checklist for planning and executing a team‑building event." />
+  <style>
+    :root{
+      --bg:#0f141b; --panel:#121a23; --panel-2:#0e1620; --text:#e8eef6; --muted:#a9b7c6; --brand:#6ea8fe; --accent:#8ce99a; --warn:#ffd43b; --danger:#ff6b6b; --border:#213042;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#0c1117 70%);color:var(--text);font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"}
+    .container{max-width:1100px;margin:28px auto;padding:0 16px}
+    header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .app-title{font-weight:800;letter-spacing:.2px;font-size:clamp(20px,2.4vw,28px)}
+    .subtitle{color:var(--muted);font-size:14px}
+    .toolbar{display:flex;flex-wrap:wrap;gap:8px}
+    button,.chip, input[type="search"], select{
+      background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:10px 12px;font:inherit;cursor:pointer
+    }
+    button:disabled{opacity:.6;cursor:not-allowed}
+    .chip{cursor:default}
+    input[type="search"]{cursor:text}
+    .brand{background:linear-gradient(180deg,#1a2a3b,var(--panel));border-color:#274158}
+    .accent{background:linear-gradient(180deg,#172b20,#12261b);border-color:#27483a}
+    .danger{background:linear-gradient(180deg,#2b1717,#221313);border-color:#4b2424}
+    .ghost{background:transparent}
+    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; padding:.1rem .35rem;border-radius:6px;border:1px solid var(--border);background:var(--panel-2)}
+
+    .phase{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:18px;padding:14px 14px 6px;margin:12px 0;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .phase-head{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+    .phase-title{margin:2px 0 0;font-size:clamp(16px,2vw,20px)}
+    .phase-meta{color:var(--muted);font-size:13px}
+    details summary{list-style:none}
+    details summary::-webkit-details-marker{display:none}
+
+    .progress{height:8px;background:#0b1117;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+    .progress > span{height:100%;display:block;background:linear-gradient(90deg,var(--brand),#8ec5ff)}
+
+    .tasks{margin:4px 0 10px;display:grid;gap:8px}
+    .task{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:10px;display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:start}
+    .task:hover{border-color:#2d435a}
+    .task input[type="checkbox"]{margin-top:4px;width:18px;height:18px}
+    .task-main{display:flex;flex-direction:column;gap:4px}
+    .task-title{font-weight:600}
+    .badges{display:flex;flex-wrap:wrap;gap:6px}
+    .badge{font-size:12px;color:var(--muted);border:1px dashed var(--border);padding:3px 8px;border-radius:999px}
+    .badge.warn{border-style:solid;color:#ffe08a;border-color:#5a4a1a;background:rgba(161, 120, 16, .08)}
+
+    .foot{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:8px}
+
+    .grid{display:grid;gap:12px}
+    @media (min-width:900px){
+      .grid{grid-template-columns:1fr 1fr}
+    }
+
+    footer{margin:18px 0;color:var(--muted);font-size:13px}
+    a{color:#9ec5ff}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <div class="app-title">Team‑Building Event • Project Checklist</div>
+        <div class="subtitle">Core objective: strengthen collaboration, boost morale, and deliver an on‑budget, on‑time event.</div>
+      </div>
+      <div class="toolbar">
+        <input id="q" type="search" placeholder="Search tasks (⌘/Ctrl + K)" aria-label="Search tasks" />
+        <select id="view">
+          <option value="all">View: All phases</option>
+          <option value="open">View: Open only</option>
+          <option value="done">View: Completed only</option>
+        </select>
+        <button id="expandAll" class="ghost" title="Expand or collapse all">Toggle Expand</button>
+        <button id="exportBtn" class="brand" title="Download checklist as JSON">Export</button>
+        <button id="resetBtn" class="danger" title="Clear completion state">Reset</button>
+        <button id="printBtn" class="accent" title="Print checklist">Print</button>
+      </div>
+    </header>
+
+    <div id="overall" class="phase" aria-live="polite">
+      <div class="phase-head">
+        <div>
+          <h2 class="phase-title">Overall Progress</h2>
+          <div class="phase-meta"><span id="overallCount">0/0</span> tasks complete</div>
+        </div>
+        <div style="min-width:260px;width:36%">
+          <div class="progress"><span id="overallBar" style="width:0%"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <main id="phases" class="grid"></main>
+
+    <footer>
+      <div>Pro tip: Press <span class="kbd">⌘/Ctrl</span> + <span class="kbd">K</span> to jump to search. Your progress saves to your browser (localStorage).</div>
+    </footer>
+  </div>
+
+  <script>
+  // ---------------------- Data Model ----------------------
+  const MODEL = [
+    {
+      id: 'p1',
+      title: 'Phase 1 – Initiation & Alignment',
+      goal: 'Define scope and expectations clearly',
+      tasks: [
+        { id:'p1t1', action:'Schedule initial planning meeting with leadership', time:'1 day', owner:'Executive Assistant (EA)', followup:true },
+        { id:'p1t2', action:'Confirm event objectives and expected outcomes', time:'2 days', owner:'Client / Leadership', followup:true },
+        { id:'p1t3', action:'Finalize participant list (attendees & departments)', time:'2 days', owner:'HR', followup:true },
+        { id:'p1t4', action:'Approve tentative date and event duration', time:'1 day', owner:'Leadership', followup:true },
+        { id:'p1t5', action:'Confirm budget ceiling (per person or total)', time:'3 days', owner:'Finance + Leadership', followup:true },
+      ]
+    },
+    {
+      id: 'p2',
+      title: 'Phase 2 – Concept & Program Design',
+      goal: 'Establish the structure of the event',
+      tasks: [
+        { id:'p2t1', action:'Brainstorm activity themes (fun vs. development vs. mix)', time:'2 days', owner:'EA + HR + Leadership', followup:true },
+        { id:'p2t2', action:'Draft preliminary program agenda', time:'3 days', owner:'EA', followup:true },
+        { id:'p2t3', action:'Identify 3–4 potential facilitators/partners', time:'4 days', owner:'EA', followup:true },
+        { id:'p2t4', action:'Obtain quotes & availability for facilitation', time:'3 days', owner:'EA', followup:true },
+        { id:'p2t5', action:'Present agenda & concept for approval', time:'2 days', owner:'EA', followup:true },
+      ]
+    },
+    {
+      id: 'p3',
+      title: 'Phase 3 – Logistics & Resource Planning',
+      goal: 'Secure all operational components',
+      tasks: [
+        { id:'p3t1', action:'Research and propose 3 venue options', time:'4 days', owner:'EA', followup:true },
+        { id:'p3t2', action:'Secure venue booking (and deposit if required)', time:'3 days', owner:'EA + Finance', followup:true },
+        { id:'p3t3', action:'Arrange transport options (buses, carpool, etc.)', time:'5 days', owner:'EA', followup:true },
+        { id:'p3t4', action:'Plan catering (meals, snacks, dietary needs)', time:'5 days', owner:'EA + Catering Vendor', followup:true },
+        { id:'p3t5', action:'Arrange accommodation (if overnight event)', time:'5 days', owner:'EA', followup:true },
+        { id:'p3t6', action:'Create risk management & contingency plan', time:'3 days', owner:'EA + HR', followup:true },
+        { id:'p3t7', action:'Confirm vendor contracts (facilitators, suppliers)', time:'4 days', owner:'EA + Finance', followup:true },
+      ]
+    },
+    {
+      id: 'p4',
+      title: 'Phase 4 – Communication & Engagement',
+      goal: 'Ensure participants and stakeholders are prepared and excited',
+      tasks: [
+        { id:'p4t1', action:'Draft and send save‑the‑date notice to participants', time:'1 day', owner:'EA', followup:false },
+        { id:'p4t2', action:'Send formal invites with agenda, logistics, dress code', time:'2 days', owner:'EA', followup:true },
+        { id:'p4t3', action:'Coordinate with HR to handle participant queries', time:'Ongoing', owner:'HR + EA', followup:true },
+        { id:'p4t4', action:'Prepare engagement materials (icebreakers, swag, handouts)', time:'7 days', owner:'EA + Design/Comms', followup:true },
+        { id:'p4t5', action:'Provide regular stakeholder updates (progress/costs/issues)', time:'Bi‑weekly', owner:'EA', followup:true },
+        { id:'p4t6', action:'Prepare final event‑day checklist', time:'2 days', owner:'EA', followup:true },
+      ]
+    },
+    {
+      id: 'p5',
+      title: 'Phase 5 – Execution & Post‑Event Review',
+      goal: 'Deliver the event and capture outcomes',
+      tasks: [
+        { id:'p5t1', action:'Oversee setup and vendor coordination (arrive early)', time:'Event day', owner:'EA', followup:false },
+        { id:'p5t2', action:'Register participants and manage check‑in', time:'Event day', owner:'EA + HR volunteers', followup:false },
+        { id:'p5t3', action:'Coordinate activities and manage event flow', time:'Event day', owner:'EA + Facilitators', followup:false },
+        { id:'p5t4', action:'Handle real‑time issues (logistics/emergencies/adjustments)', time:'Event day', owner:'EA', followup:false },
+        { id:'p5t5', action:'Distribute post‑event feedback surveys', time:'+2 days', owner:'EA', followup:true },
+        { id:'p5t6', action:'Analyze feedback & compile event report', time:'5 days', owner:'EA + HR', followup:true },
+        { id:'p5t7', action:'Document lessons learned & recommendations', time:'3 days', owner:'EA', followup:true },
+      ]
+    }
+  ];
+
+  const STORAGE_KEY = 'tb_checklist_v1';
+
+  // ---------------------- State & Persistence ----------------------
+  const loadState = () => {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+    catch { return {}; }
+  }
+  const saveState = (state) => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+  let state = loadState(); // { taskId: true/false }
+
+  // ---------------------- DOM Helpers ----------------------
+  const $ = (sel, ctx=document) => ctx.querySelector(sel);
+  const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+
+  // ---------------------- Render ----------------------
+  function render(){
+    const host = $('#phases');
+    host.innerHTML = '';
+
+    let total = 0, done = 0;
+
+    MODEL.forEach(phase => {
+      const openOnly = $('#view').value === 'open';
+      const doneOnly = $('#view').value === 'done';
+
+      const phaseEl = document.createElement('section');
+      phaseEl.className = 'phase';
+
+      const checkedInPhase = phase.tasks.filter(t => state[t.id]).length;
+      const pct = Math.round((checkedInPhase / phase.tasks.length) * 100);
+
+      const details = document.createElement('details');
+      details.open = true;
+
+      const sum = document.createElement('summary');
+      sum.innerHTML = `
+        <div class="phase-head">
+          <div>
+            <h3 class="phase-title">${phase.title}</h3>
+            <div class="phase-meta">Goal: ${phase.goal} • <strong>${checkedInPhase}/${phase.tasks.length}</strong> complete</div>
+          </div>
+          <div style="min-width:220px;width:32%">
+            <div class="progress"><span style="width:${pct}%"></span></div>
+          </div>
+        </div>`;
+
+      const list = document.createElement('div');
+      list.className = 'tasks';
+
+      phase.tasks.forEach(task => {
+        const q = $('#q').value.trim().toLowerCase();
+        const text = `${task.action} ${task.time} ${task.owner} ${task.followup ? 'follow-up' : ''}`.toLowerCase();
+        const matches = !q || text.includes(q);
+        const isDone = !!state[task.id];
+
+        total++;
+        if(isDone) done++;
+
+        // Filter mode visibility
+        if(!matches) return; // hidden by search
+        if(openOnly && isDone) return;
+        if(doneOnly && !isDone) return;
+
+        const row = document.createElement('div');
+        row.className = 'task';
+        row.dataset.taskId = task.id;
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = isDone;
+        cb.addEventListener('change', () => {
+          state[task.id] = cb.checked;
+          saveState(state);
+          render();
+        });
+
+        const main = document.createElement('div');
+        main.className = 'task-main';
+        const title = document.createElement('div');
+        title.className = 'task-title';
+        title.textContent = task.action;
+        const badges = document.createElement('div');
+        badges.className = 'badges';
+        badges.innerHTML = `
+          <span class="badge" title="Estimated completion time">⏱ ${task.time}</span>
+          <span class="badge" title="Task owner">👤 ${task.owner}</span>
+          ${task.followup ? '<span class="badge warn" title="Follow-up required">🔔 Follow‑up</span>' : ''}
+        `;
+        main.appendChild(title);
+        main.appendChild(badges);
+
+        const actions = document.createElement('div');
+        actions.style.display='flex';
+        actions.style.gap='6px';
+        const copyBtn = document.createElement('button');
+        copyBtn.className='ghost';
+        copyBtn.title='Copy task to clipboard';
+        copyBtn.textContent='Copy';
+        copyBtn.addEventListener('click', async ()=>{
+          const txt = `${phase.title} → ${task.action} (Time: ${task.time}; Owner: ${task.owner}; Follow‑up: ${task.followup ? 'Yes' : 'No'})`;
+          try{ await navigator.clipboard.writeText(txt); copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy',1200);}catch{}
+        });
+        actions.appendChild(copyBtn);
+
+        row.appendChild(cb);
+        row.appendChild(main);
+        row.appendChild(actions);
+        list.appendChild(row);
+      });
+
+      details.appendChild(sum);
+      details.appendChild(list);
+      phaseEl.appendChild(details);
+      host.appendChild(phaseEl);
+    });
+
+    // Update overall progress
+    const pctOverall = total ? Math.round((done/total)*100) : 0;
+    $('#overallCount').textContent = `${done}/${total}`;
+    $('#overallBar').style.width = pctOverall + '%';
+  }
+
+  // ---------------------- Controls ----------------------
+  $('#q').addEventListener('input', render);
+  $('#view').addEventListener('change', render);
+  document.addEventListener('keydown', (e)=>{
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){
+      e.preventDefault(); $('#q').focus(); $('#q').select();
+    }
+  });
+
+  let expanded = true;
+  $('#expandAll').addEventListener('click', ()=>{
+    expanded = !expanded;
+    $$('#phases details').forEach(d => d.open = expanded);
+  });
+
+  $('#exportBtn').addEventListener('click', ()=>{
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      model: MODEL,
+      state
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'team-building-checklist.json'; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  });
+
+  $('#resetBtn').addEventListener('click', ()=>{
+    if(confirm('This will clear all completion checkmarks. Continue?')){
+      state = {}; saveState(state); render();
+    }
+  });
+
+  $('#printBtn').addEventListener('click', ()=> window.print());
+
+  // Initial render
+  render();
+  </script>
+</body>
+</html>
